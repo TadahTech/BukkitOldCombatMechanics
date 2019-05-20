@@ -24,10 +24,10 @@ public class TeamUtils {
      * @param packet        the packet to set it for
      * @param collisionRule the collision rule
      */
-    public static void setCollisionRule(Object packet, CollisionRule collisionRule){
-        try{
+    public static void setCollisionRule(Object packet, CollisionRule collisionRule) {
+        try {
             VERSION_DATA.getFieldCollisionRule().set(packet, collisionRule.getName());
-        } catch(IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             // should not happen if the getting works
             throw new RuntimeException("Error setting collision field", e);
         }
@@ -39,10 +39,10 @@ public class TeamUtils {
      * @param packet the packet
      * @return the action for the packet
      */
-    public static TeamAction getPacketAction(Object packet){
-        try{
+    public static TeamAction getPacketAction(Object packet) {
+        try {
             return TeamAction.fromId((Integer) VERSION_DATA.getFieldAction().get(packet));
-        } catch(IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             // should not happen if the getting works
             throw new RuntimeException("Error getting action field", e);
         }
@@ -54,10 +54,10 @@ public class TeamUtils {
      * @param packet the packet
      * @param action the new action
      */
-    public static void setPacketAction(Object packet, TeamAction action){
-        try{
+    public static void setPacketAction(Object packet, TeamAction action) {
+        try {
             VERSION_DATA.getFieldAction().set(packet, action.getMinecraftId());
-        } catch(IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             // should not happen if the getting works
             throw new RuntimeException("Error setting action field", e);
         }
@@ -70,7 +70,7 @@ public class TeamUtils {
      * @param player the player to check for
      * @return true if the packet targets the player
      */
-    public static boolean targetsPlayer(Object packet, Player player){
+    public static boolean targetsPlayer(Object packet, Player player) {
         Collection<String> teamMembers = getTeamMembers(packet);
         return teamMembers != null && teamMembers.contains(player.getName());
     }
@@ -81,14 +81,14 @@ public class TeamUtils {
      * @param player        the player to send it to
      * @param collisionRule the collision rule to use
      */
-    public static TeamPacket craftTeamCreatePacket(Player player, CollisionRule collisionRule){
+    public static TeamPacket craftTeamCreatePacket(Player player, CollisionRule collisionRule) {
         String teamName = UUID.randomUUID().toString().substring(0, 15);
 
         Object teamPacket = VERSION_DATA.createTeamPacket(
-                TeamAction.CREATE,
-                collisionRule,
-                teamName,
-                Collections.singletonList(player)
+          TeamAction.CREATE,
+          collisionRule,
+          teamName,
+          Collections.singletonList(player)
         );
 
         return new TeamPacket(teamPacket);
@@ -100,13 +100,13 @@ public class TeamUtils {
      * @param packet the packet
      * @return returns all team members
      */
-    static Collection<String> getTeamMembers(Object packet){
-        try{
+    static Collection<String> getTeamMembers(Object packet) {
+        try {
             @SuppressWarnings("unchecked")
             Collection<String> identifiers = (Collection<String>) VERSION_DATA.getFieldPlayerNames().get(packet);
 
             return identifiers;
-        } catch(IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             // should not happen if the getting works
             throw new RuntimeException("Error getting players", e);
         }
@@ -118,10 +118,10 @@ public class TeamUtils {
      * @param packet     the packet
      * @param newMembers the new team members
      */
-    static void setTeamMembers(Object packet, Collection<?> newMembers){
-        try{
+    static void setTeamMembers(Object packet, Collection<?> newMembers) {
+        try {
             VERSION_DATA.getFieldPlayerNames().set(packet, newMembers);
-        } catch(IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             throw new RuntimeException("Error setting members", e);
         }
     }
@@ -135,7 +135,7 @@ public class TeamUtils {
      * @param players       the players onm the team
      */
     static Object createTeamNMSPacket(TeamAction action, CollisionRule collisionRule, String name,
-                                      Collection<Player> players){
+                                      Collection<Player> players) {
         return VERSION_DATA.createTeamPacket(action, collisionRule, name, players);
     }
 
@@ -150,7 +150,7 @@ public class TeamUtils {
         private final Field fieldName;
         private final Constructor<?> constructorTeamPacket;
 
-        VersionData(){
+        VersionData() {
             Class<?> packetClass = Reflector.getClass(ClassType.NMS, "PacketPlayOutScoreboardTeam");
             this.fieldCollisionRule = Reflector.getInaccessibleField(packetClass, "f");
             this.fieldPlayerNames = Reflector.getInaccessibleField(packetClass, "h");
@@ -160,21 +160,21 @@ public class TeamUtils {
             this.constructorTeamPacket = Reflector.getConstructor(packetClass, 0);
         }
 
-        Field getFieldCollisionRule(){
+        Field getFieldCollisionRule() {
             return fieldCollisionRule;
         }
 
-        Field getFieldPlayerNames(){
+        Field getFieldPlayerNames() {
             return fieldPlayerNames;
         }
 
-        Field getFieldAction(){
+        Field getFieldAction() {
             return fieldAction;
         }
 
         Object createTeamPacket(TeamAction action, CollisionRule collisionRule, String name,
-                                Collection<Player> players){
-            try{
+                                Collection<Player> players) {
+            try {
                 Object packet = constructorTeamPacket.newInstance();
 
                 getFieldPlayerNames().set(packet, players.stream().map(Player::getName).collect(Collectors.toList()));
@@ -183,7 +183,7 @@ public class TeamUtils {
                 fieldName.set(packet, name);
 
                 return packet;
-            } catch(ReflectiveOperationException e){
+            } catch (ReflectiveOperationException e) {
                 throw new RuntimeException("Error creating team packet", e);
             }
         }

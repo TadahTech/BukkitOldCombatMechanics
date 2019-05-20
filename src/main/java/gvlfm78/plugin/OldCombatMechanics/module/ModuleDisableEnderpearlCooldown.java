@@ -25,21 +25,27 @@ public class ModuleDisableEnderpearlCooldown extends Module {
      */
     private Set<Player> ignoredPlayers;
 
-    public ModuleDisableEnderpearlCooldown(OCMMain plugin){
+    public ModuleDisableEnderpearlCooldown(OCMMain plugin) {
         super(plugin, "disable-enderpearl-cooldown");
 
         ignoredPlayers = new HashSet<>();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerShoot(ProjectileLaunchEvent e){
-        if(!(e.getEntity() instanceof EnderPearl)) return;
+    public void onPlayerShoot(ProjectileLaunchEvent e) {
+        if (!(e.getEntity() instanceof EnderPearl)) {
+            return;
+        }
         ProjectileSource shooter = e.getEntity().getShooter();
 
-        if(!(shooter instanceof Player)) return;
+        if (!(shooter instanceof Player)) {
+            return;
+        }
         Player player = (Player) shooter;
 
-        if(ignoredPlayers.contains(player)) return;
+        if (ignoredPlayers.contains(player)) {
+            return;
+        }
 
         e.setCancelled(true);
 
@@ -52,12 +58,14 @@ public class ModuleDisableEnderpearlCooldown extends Module {
 
         pearl.setVelocity(player.getEyeLocation().getDirection().multiply(2));
 
-        if(player.getGameMode() == GameMode.CREATIVE) return;
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            return;
+        }
 
         ItemStack enderpearlItemStack;
-        if(isEnderPearl(player.getInventory().getItemInMainHand())){
+        if (isEnderPearl(player.getInventory().getItemInMainHand())) {
             enderpearlItemStack = player.getInventory().getItemInMainHand();
-        } else if(isEnderPearl(player.getInventory().getItemInOffHand())){
+        } else if (isEnderPearl(player.getInventory().getItemInOffHand())) {
             enderpearlItemStack = player.getInventory().getItemInOffHand();
         } else {
             return;
@@ -66,7 +74,7 @@ public class ModuleDisableEnderpearlCooldown extends Module {
         enderpearlItemStack.setAmount(enderpearlItemStack.getAmount() - 1);
     }
 
-    private boolean isEnderPearl(ItemStack itemStack){
+    private boolean isEnderPearl(ItemStack itemStack) {
         return itemStack != null && itemStack.getType() == Material.ENDER_PEARL;
     }
 }

@@ -10,7 +10,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Manages PacketListeners and stuff
@@ -29,7 +34,7 @@ public class PacketManager implements Listener {
      *
      * @param plugin The plugin to instantiate it as
      */
-    private PacketManager(Plugin plugin){
+    private PacketManager(Plugin plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
         OCMMain.getInstance().addDisableListener(() -> {
@@ -44,8 +49,8 @@ public class PacketManager implements Listener {
      * @return An instance of the PacketManager
      */
     @SuppressWarnings("unused")
-    public static synchronized PacketManager getInstance(){
-        if(instance == null){
+    public static synchronized PacketManager getInstance() {
+        if (instance == null) {
             instance = new PacketManager(OCMMain.getInstance());
         }
         return instance;
@@ -59,21 +64,21 @@ public class PacketManager implements Listener {
      * @throws NullPointerException if any parameter is null
      */
     @SuppressWarnings("unused")
-    public void addListener(PacketListener listener, Player player){
+    public void addListener(PacketListener listener, Player player) {
         Objects.requireNonNull(listener, "listener can not be null");
         Objects.requireNonNull(player, "player can not be null");
 
         // no modifications during checks or the result may be wrong! (it
         // changes depending on the current state)
-        synchronized(injectorMap){
-            if(injectorMap.containsKey(player.getUniqueId())){
+        synchronized (injectorMap) {
+            if (injectorMap.containsKey(player.getUniqueId())) {
                 injectorMap.get(player.getUniqueId()).addPacketListener(listener);
             } else {
-                try{
+                try {
                     PacketInjector injector = new PacketInjector(player);
                     injector.addPacketListener(listener);
                     injectorMap.put(player.getUniqueId(), injector);
-                } catch(Exception e){
+                } catch (Exception e) {
                     Messenger.debug("Error attaching packet listener!", e);
                 }
             }
@@ -88,19 +93,19 @@ public class PacketManager implements Listener {
      * @throws NullPointerException if any parameter is null
      */
     @SuppressWarnings("unused")
-    public void removeListener(PacketListener listener, Player player){
+    public void removeListener(PacketListener listener, Player player) {
         Objects.requireNonNull(listener, "listener can not be null");
         Objects.requireNonNull(player, "player can not be null");
 
         // no modifications during checks or the result may be wrong! (it
         // changes depending on the current state)
-        synchronized(injectorMap){
-            if(!injectorMap.containsKey(player.getUniqueId())){
+        synchronized (injectorMap) {
+            if (!injectorMap.containsKey(player.getUniqueId())) {
                 return;
             }
             PacketInjector injector = injectorMap.get(player.getUniqueId());
             injector.removePacketListener(listener);
-            if(injector.getListenerAmount() < 1){
+            if (injector.getListenerAmount() < 1) {
                 injector.detach();
                 injectorMap.remove(player.getUniqueId());
             }
@@ -114,13 +119,13 @@ public class PacketManager implements Listener {
      * @throws NullPointerException if uuid is null
      */
     @SuppressWarnings("WeakerAccess")
-    public void removeAllListeners(UUID uuid){
+    public void removeAllListeners(UUID uuid) {
         Objects.requireNonNull(uuid, "uuid can not be null");
 
         // no modifications during checks or the result may be wrong! (it
         // changes depending on the current state)
-        synchronized(injectorMap){
-            if(injectorMap.containsKey(uuid)){
+        synchronized (injectorMap) {
+            if (injectorMap.containsKey(uuid)) {
                 injectorMap.get(uuid).detach();
                 injectorMap.remove(uuid);
             }
@@ -132,8 +137,8 @@ public class PacketManager implements Listener {
      * <p>
      * Use with caution or not at all.
      */
-    private void removeAll(){
-        synchronized(injectorMap){
+    private void removeAll() {
+        synchronized (injectorMap) {
             // clone to avoid concurrent modification
             Set<UUID> keys = new HashSet<>(injectorMap.keySet());
             keys.forEach(this::removeAllListeners);
@@ -141,7 +146,7 @@ public class PacketManager implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onLeave(PlayerQuitEvent event){
+    public void onLeave(PlayerQuitEvent event) {
         // clean up
         removeAllListeners(event.getPlayer().getUniqueId());
     }

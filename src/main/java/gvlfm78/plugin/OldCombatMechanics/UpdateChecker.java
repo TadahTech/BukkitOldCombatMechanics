@@ -17,8 +17,8 @@ import java.util.function.Consumer;
 public class UpdateChecker {
     private UpdateSource updateSource;
 
-    public UpdateChecker(OCMMain plugin, File pluginFile){
-        switch(ModuleUpdateChecker.getMode()){
+    public UpdateChecker(OCMMain plugin, File pluginFile) {
+        switch (ModuleUpdateChecker.getMode()) {
             case "spigot":
                 this.updateSource = new SpigotUpdateSource();
                 break;
@@ -26,7 +26,7 @@ public class UpdateChecker {
                 this.updateSource = new BukkitUpdateSource(plugin, pluginFile);
                 break;
             case "auto":
-                if(Bukkit.getVersion().toLowerCase(Locale.ROOT).contains("spigot")){
+                if (Bukkit.getVersion().toLowerCase(Locale.ROOT).contains("spigot")) {
                     this.updateSource = new SpigotUpdateSource();
                 } else {
                     this.updateSource = new BukkitUpdateSource(plugin, pluginFile);
@@ -34,18 +34,18 @@ public class UpdateChecker {
         }
     }
 
-    public void sendUpdateMessages(CommandSender sender){
-        if(sender instanceof Player){
+    public void sendUpdateMessages(CommandSender sender) {
+        if (sender instanceof Player) {
             sendUpdateMessages(((Player) sender)::sendMessage);
         } else {
             sendUpdateMessages(Messenger::info);
         }
     }
 
-    private void sendUpdateMessages(Consumer<String> target){//Sends messages to a player
+    private void sendUpdateMessages(Consumer<String> target) {//Sends messages to a player
         updateSource.getUpdateMessages().stream()
-                .filter(Objects::nonNull)
-                .filter(message -> !message.isEmpty())
-                .forEach(target);
+          .filter(Objects::nonNull)
+          .filter(message -> !message.isEmpty())
+          .forEach(target);
     }
 }

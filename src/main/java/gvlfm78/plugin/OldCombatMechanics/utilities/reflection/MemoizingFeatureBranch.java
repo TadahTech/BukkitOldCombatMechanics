@@ -26,27 +26,10 @@ public class MemoizingFeatureBranch<T, R> {
      * @param trueBranch  the branch to pick when then test is true
      * @param falseBranch the branch to pick when then test is false
      */
-    public MemoizingFeatureBranch(Function<T, Boolean> test, Function<T, R> trueBranch, Function<T, R> falseBranch){
+    public MemoizingFeatureBranch(Function<T, Boolean> test, Function<T, R> trueBranch, Function<T, R> falseBranch) {
         this.test = test;
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
-    }
-
-    /**
-     * Applies the stored action to the given target and chooses what branch to use on the first call.
-     *
-     * @param target the target to apply it to
-     * @return the result of applying the function to the given target
-     */
-    public R apply(T target){
-        if(chosen == null){
-            synchronized(this){
-                if(chosen == null){
-                    chosen = test.apply(target) ? trueBranch : falseBranch;
-                }
-            }
-        }
-        return chosen.apply(target);
     }
 
     /**
@@ -64,18 +47,35 @@ public class MemoizingFeatureBranch<T, R> {
      */
     public static <T, R> MemoizingFeatureBranch<T, R> onException(ExceptionalFunction<T, R> action,
                                                                   Function<T, R> success,
-                                                                  Function<T, R> failure){
+                                                                  Function<T, R> failure) {
         return new MemoizingFeatureBranch<>(
-                (t) -> {
-                    try{
-                        action.apply(t);
-                        return true;
-                    } catch(ExceptionalFunction.WrappedException e){
-                        return false;
-                    }
-                },
-                success, failure
+          (t) -> {
+              try {
+                  action.apply(t);
+                  return true;
+              } catch (ExceptionalFunction.WrappedException e) {
+                  return false;
+              }
+          },
+          success, failure
         );
+    }
+
+    /**
+     * Applies the stored action to the given target and chooses what branch to use on the first call.
+     *
+     * @param target the target to apply it to
+     * @return the result of applying the function to the given target
+     */
+    public R apply(T target) {
+        if (chosen == null) {
+            synchronized (this) {
+                if (chosen == null) {
+                    chosen = test.apply(target) ? trueBranch : falseBranch;
+                }
+            }
+        }
+        return chosen.apply(target);
     }
 
     @FunctionalInterface
@@ -98,16 +98,16 @@ public class MemoizingFeatureBranch<T, R> {
          * @throws WrappedException if any any *Throwable* is thrown
          */
         @Override
-        default R apply(T t){
-            try{
+        default R apply(T t) {
+            try {
                 return applyWithException(t);
-            } catch(Throwable e){
+            } catch (Throwable e) {
                 throw new WrappedException(e);
             }
         }
 
         class WrappedException extends RuntimeException {
-            WrappedException(Throwable cause){
+            WrappedException(Throwable cause) {
                 super(cause);
             }
         }

@@ -8,11 +8,11 @@ public enum CollisionRule {
 
     private String name;
 
-    CollisionRule(String name){
+    CollisionRule(String name) {
         this.name = name;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 }

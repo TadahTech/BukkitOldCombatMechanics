@@ -13,18 +13,20 @@ import org.bukkit.util.Vector;
  */
 public class ModuleDisableProjectileRandomness extends Module {
 
-    public ModuleDisableProjectileRandomness(OCMMain plugin){
+    public ModuleDisableProjectileRandomness(OCMMain plugin) {
         super(plugin, "disable-projectile-randomness");
     }
 
     @EventHandler
-    public void onProjectileLaunch(ProjectileLaunchEvent e){
+    public void onProjectileLaunch(ProjectileLaunchEvent e) {
         Projectile projectile = e.getEntity();
         ProjectileSource shooter = projectile.getShooter();
 
-        if(shooter instanceof Player){
+        if (shooter instanceof Player) {
             Player player = (Player) shooter;
-            if(!isEnabled(player.getWorld())) return;
+            if (!isEnabled(player.getWorld())) {
+                return;
+            }
             debug("Making projectile go straight", player);
 
             Vector playerDirection = player.getLocation().getDirection().normalize();

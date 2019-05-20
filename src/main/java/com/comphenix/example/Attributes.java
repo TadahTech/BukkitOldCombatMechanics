@@ -17,7 +17,7 @@ public class Attributes {
     public ItemStack stack;
     private NbtList attributes;
 
-    public Attributes(ItemStack stack){
+    public Attributes(ItemStack stack) {
         // Create a CraftItemStack (under the hood)
         this.stack = NbtFactory.getCraftItemStack(stack);
 
@@ -31,7 +31,7 @@ public class Attributes {
      *
      * @return The modified item stack.
      */
-    public ItemStack getStack(){
+    public ItemStack getStack() {
         return stack;
     }
 
@@ -40,7 +40,7 @@ public class Attributes {
      *
      * @return Number of attributes.
      */
-    public int size(){
+    public int size() {
         return attributes.size();
     }
 
@@ -49,7 +49,7 @@ public class Attributes {
      *
      * @param attribute - the new attribute.
      */
-    public void add(Attribute attribute){
+    public void add(Attribute attribute) {
         Preconditions.checkNotNull(attribute.getName(), "must specify an attribute name.");
         attributes.add(attribute.data);
     }
@@ -62,11 +62,11 @@ public class Attributes {
      * @param attribute - the attribute to remove.
      * @return TRUE if the attribute was removed, FALSE otherwise.
      */
-    public boolean remove(Attribute attribute){
+    public boolean remove(Attribute attribute) {
         UUID uuid = attribute.getUUID();
 
-        for(Iterator<Attribute> it = values().iterator(); it.hasNext(); ){
-            if(Objects.equal(it.next().getUUID(), uuid)){
+        for (Iterator<Attribute> it = values().iterator(); it.hasNext(); ) {
+            if (Objects.equal(it.next().getUUID(), uuid)) {
                 it.remove();
                 return true;
             }
@@ -74,7 +74,7 @@ public class Attributes {
         return false;
     }
 
-    public void clear(){
+    public void clear() {
         attributes.clear();
     }
 
@@ -84,14 +84,14 @@ public class Attributes {
      * @param index - the index to look up.
      * @return The attribute at that index.
      */
-    public Attribute get(int index){
+    public Attribute get(int index) {
         return new Attribute((NbtCompound) attributes.get(index));
     }
 
     // We can't make Attributes itself iterable without splitting it up into separate classes
-    public Iterable<Attribute> values(){
+    public Iterable<Attribute> values() {
         return () -> Iterators.transform(attributes.iterator(),
-                element -> new Attribute((NbtCompound) element));
+          element -> new Attribute((NbtCompound) element));
     }
 
     public enum Operation {
@@ -100,21 +100,21 @@ public class Attributes {
         ADD_PERCENTAGE(2);
         private int id;
 
-        Operation(int id){
+        Operation(int id) {
             this.id = id;
         }
 
-        public static Operation fromId(int id){
+        public static Operation fromId(int id) {
             // Linear scan is very fast for small N
-            for(Operation op : values()){
-                if(op.getId() == id){
+            for (Operation op : values()) {
+                if (op.getId() == id) {
                     return op;
                 }
             }
             throw new IllegalArgumentException("Corrupt operation ID " + id + " detected.");
         }
 
-        public int getId(){
+        public int getId() {
             return id;
         }
     }
@@ -140,7 +140,7 @@ public class Attributes {
          *
          * @param minecraftId - the ID of the type.
          */
-        public AttributeType(String minecraftId){
+        public AttributeType(String minecraftId) {
             this.minecraftId = minecraftId;
         }
 
@@ -150,7 +150,7 @@ public class Attributes {
          * @param minecraftId The ID to search for.
          * @return The attribute type, or NULL if not found.
          */
-        public static AttributeType fromId(String minecraftId){
+        public static AttributeType fromId(String minecraftId) {
             return LOOKUP.get(minecraftId);
         }
 
@@ -159,7 +159,7 @@ public class Attributes {
          *
          * @return Every type.
          */
-        public static Iterable<AttributeType> values(){
+        public static Iterable<AttributeType> values() {
             return LOOKUP.values();
         }
 
@@ -168,7 +168,7 @@ public class Attributes {
          *
          * @return The associated ID.
          */
-        public String getMinecraftId(){
+        public String getMinecraftId() {
             return minecraftId;
         }
 
@@ -178,7 +178,7 @@ public class Attributes {
          * @return The registered type.
          */
         // Constructors should have no side-effects!
-        public AttributeType register(){
+        public AttributeType register() {
             AttributeType old = LOOKUP.putIfAbsent(minecraftId, this);
             return old != null ? old : this;
         }
@@ -187,7 +187,7 @@ public class Attributes {
     public static class Attribute {
         private NbtCompound data;
 
-        private Attribute(Builder builder){
+        private Attribute(Builder builder) {
             data = NbtFactory.createCompound();
             setAmount(builder.amount);
             setOperation(builder.operation);
@@ -197,7 +197,7 @@ public class Attributes {
             setSlot(builder.slot);
         }
 
-        private Attribute(NbtCompound data){
+        private Attribute(NbtCompound data) {
             this.data = data;
         }
 
@@ -206,65 +206,65 @@ public class Attributes {
          *
          * @return The attribute builder.
          */
-        public static Builder newBuilder(){
+        public static Builder newBuilder() {
             return new Builder().uuid(UUID.randomUUID()).operation(Operation.ADD_NUMBER);
         }
 
-        public double getAmount(){
+        public double getAmount() {
             // Hack for bad Bukkit plugins which don't realize that THESE ARE SUPPOSED TO BE DOUBLES!!! *le sigh*
             Object value = data.get("Amount");
-            if(value instanceof Number){
+            if (value instanceof Number) {
                 return ((Number) value).doubleValue();
             }
             return 0.0;
         }
 
-        public void setAmount(double amount){
+        public void setAmount(double amount) {
             data.put("Amount", amount);
         }
 
-        public Operation getOperation(){
+        public Operation getOperation() {
             return Operation.fromId(data.getInteger("Operation", 0));
         }
 
-        public void setOperation(Operation operation){
+        public void setOperation(Operation operation) {
             Preconditions.checkNotNull(operation, "operation cannot be NULL.");
             data.put("Operation", operation.getId());
         }
 
-        public AttributeType getAttributeType(){
+        public AttributeType getAttributeType() {
             return AttributeType.fromId(data.getString("AttributeName", null));
         }
 
-        public void setAttributeType(AttributeType type){
+        public void setAttributeType(AttributeType type) {
             Preconditions.checkNotNull(type, "type cannot be NULL.");
             data.put("AttributeName", type.getMinecraftId());
         }
 
-        public String getName(){
+        public String getName() {
             return data.getString("Name", null);
         }
 
-        public void setName(String name){
+        public void setName(String name) {
             Preconditions.checkNotNull(name, "name cannot be NULL.");
             data.put("Name", name);
         }
 
-        public UUID getUUID(){
+        public UUID getUUID() {
             return new UUID(data.getIntegerOrLong("UUIDMost", null), data.getIntegerOrLong("UUIDLeast", null));
         }
 
-        public void setUUID(UUID id){
+        public void setUUID(UUID id) {
             Preconditions.checkNotNull(id, "id cannot be NULL.");
             data.put("UUIDLeast", id.getLeastSignificantBits());
             data.put("UUIDMost", id.getMostSignificantBits());
         }
 
-        public String getSlot(){
+        public String getSlot() {
             return data.getString("Slot", null);
         }
 
-        public void setSlot(String slot){
+        public void setSlot(String slot) {
             Preconditions.checkNotNull(slot, "slot cannot be NULL.");
             data.put("Slot", slot);
         }
@@ -272,11 +272,11 @@ public class Attributes {
         /**
          * A simple little method added by Rayzr522
          */
-        public NbtCompound getData(){
+        public NbtCompound getData() {
             return data;
         }
 
-        public void setData(NbtCompound data){
+        public void setData(NbtCompound data) {
             this.data = data;
         }
 
@@ -289,41 +289,41 @@ public class Attributes {
             private UUID uuid;
             private String slot;
 
-            private Builder(){
+            private Builder() {
                 // Don't make this accessible
             }
 
-            public Builder amount(double amount){
+            public Builder amount(double amount) {
                 this.amount = amount;
                 return this;
             }
 
-            public Builder operation(Operation operation){
+            public Builder operation(Operation operation) {
                 this.operation = operation;
                 return this;
             }
 
-            public Builder type(AttributeType type){
+            public Builder type(AttributeType type) {
                 this.type = type;
                 return this;
             }
 
-            public Builder name(String name){
+            public Builder name(String name) {
                 this.name = name;
                 return this;
             }
 
-            public Builder uuid(UUID uuid){
+            public Builder uuid(UUID uuid) {
                 this.uuid = uuid;
                 return this;
             }
 
-            public Builder slot(String slot){
+            public Builder slot(String slot) {
                 this.slot = slot;
                 return this;
             }
 
-            public Attribute build(){
+            public Attribute build() {
                 return new Attribute(this);
             }
         }

@@ -34,69 +34,82 @@ public class ModuleGoldenApple extends Module {
     private List<PotionEffect> enchantedGoldenAppleEffects, goldenAppleEffects;
     private ShapedRecipe enchantedAppleRecipe;
 
-    public ModuleGoldenApple(OCMMain plugin){
+    public ModuleGoldenApple(OCMMain plugin) {
         super(plugin, "old-golden-apples");
     }
 
     @SuppressWarnings("deprecated")
     @Override
-    public void reload(){
+    public void reload() {
         enchantedGoldenAppleEffects = getPotionEffects("napple");
         goldenAppleEffects = getPotionEffects("gapple");
 
-        try{
+        try {
             enchantedAppleRecipe = new ShapedRecipe(
-                    new NamespacedKey(plugin, "MINECRAFT"),
-                    ENCHANTED_GOLDEN_APPLE.newInstance()
+              new NamespacedKey(plugin, "MINECRAFT"),
+              ENCHANTED_GOLDEN_APPLE.newInstance()
             );
-        } catch(NoClassDefFoundError e){
+        } catch (NoClassDefFoundError e) {
             enchantedAppleRecipe = new ShapedRecipe(ENCHANTED_GOLDEN_APPLE.newInstance());
         }
         enchantedAppleRecipe
-                .shape("ggg", "gag", "ggg")
-                .setIngredient('g', Material.GOLD_BLOCK)
-                .setIngredient('a', Material.APPLE);
+          .shape("ggg", "gag", "ggg")
+          .setIngredient('g', Material.GOLD_BLOCK)
+          .setIngredient('a', Material.APPLE);
 
         registerCrafting();
     }
 
-    private void registerCrafting(){
-        if(isEnabled() && module().getBoolean("enchanted-golden-apple-crafting")){
-            if(Bukkit.getRecipesFor(ENCHANTED_GOLDEN_APPLE.newInstance()).size() > 0) return;
+    private void registerCrafting() {
+        if (isEnabled() && module().getBoolean("enchanted-golden-apple-crafting")) {
+            if (Bukkit.getRecipesFor(ENCHANTED_GOLDEN_APPLE.newInstance()).size() > 0) {
+                return;
+            }
             Bukkit.addRecipe(enchantedAppleRecipe);
             Messenger.debug("Added napple recipe");
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPrepareItemCraft(PrepareItemCraftEvent e){
-        if(e.getInventory() == null) return;
+    public void onPrepareItemCraft(PrepareItemCraftEvent e) {
+        if (e.getInventory() == null) {
+            return;
+        }
 
         ItemStack item = e.getInventory().getResult();
-        if(item == null)
+        if (item == null) {
             return; // This should never ever ever ever run. If it does then you probably screwed something up.
+        }
 
-        if(ENCHANTED_GOLDEN_APPLE.isSame(item)){
+        if (ENCHANTED_GOLDEN_APPLE.isSame(item)) {
 
             World world = e.getView().getPlayer().getWorld();
 
-            if(isSettingEnabled("no-conflict-mode")) return;
+            if (isSettingEnabled("no-conflict-mode")) {
+                return;
+            }
 
-            if(!isEnabled(world))
+            if (!isEnabled(world)) {
                 e.getInventory().setResult(null);
-            else if(isEnabled(world) && !isSettingEnabled("enchanted-golden-apple-crafting"))
+            } else if (isEnabled(world) && !isSettingEnabled("enchanted-golden-apple-crafting")) {
                 e.getInventory().setResult(null);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onItemConsume(PlayerItemConsumeEvent e){
-        if(e.getItem() == null) return;
-
-        if(e.getItem().getType() != Material.GOLDEN_APPLE && !ENCHANTED_GOLDEN_APPLE.isSame(e.getItem()))
+    public void onItemConsume(PlayerItemConsumeEvent e) {
+        if (e.getItem() == null) {
             return;
+        }
 
-        if(!isEnabled(e.getPlayer().getWorld()) || !isSettingEnabled("old-potion-effects")) return;
+        if (e.getItem().getType() != Material.GOLDEN_APPLE && !ENCHANTED_GOLDEN_APPLE.isSame(e.getItem())) {
+            return;
+        }
+
+        if (!isEnabled(e.getPlayer().getWorld()) || !isSettingEnabled("old-potion-effects")) {
+            return;
+        }
 
         e.setCancelled(true);
 
@@ -119,41 +132,42 @@ public class ModuleGoldenApple extends Module {
         // Gapple and Napple saturation is 9.6
         float saturation = p.getSaturation() + 9.6f;
         // "The total saturation never gets higher than the total number of hunger points"
-        if(saturation > foodLevel)
+        if (saturation > foodLevel) {
             saturation = foodLevel;
+        }
 
         p.setSaturation(saturation);
 
-        if(ENCHANTED_GOLDEN_APPLE.isSame(item)){
+        if (ENCHANTED_GOLDEN_APPLE.isSame(item)) {
             applyEffects(p, enchantedGoldenAppleEffects);
         } else {
             applyEffects(p, goldenAppleEffects);
         }
 
-        if(item.getAmount() <= 0)
+        if (item.getAmount() <= 0) {
             item = null;
+        }
 
         ItemStack mainHand = inv.getItemInMainHand();
         ItemStack offHand = inv.getItemInOffHand();
 
-        if(mainHand.equals(originalItem))
+        if (mainHand.equals(originalItem)) {
             inv.setItemInMainHand(item);
-
-        else if(offHand.equals(originalItem))
+        } else if (offHand.equals(originalItem)) {
             inv.setItemInOffHand(item);
-
-        else if(mainHand.getType() == Material.GOLDEN_APPLE || ENCHANTED_GOLDEN_APPLE.isSame(mainHand))
+        } else if (mainHand.getType() == Material.GOLDEN_APPLE || ENCHANTED_GOLDEN_APPLE.isSame(mainHand)) {
             inv.setItemInMainHand(item);
+        }
         // The bug occurs here, so we must check which hand has the apples
         // A player can't eat food in the offhand if there is any in the main hand
         // On this principle if there are gapples in the mainhand it must be that one, else it's the offhand
     }
 
-    private List<PotionEffect> getPotionEffects(String apple){
+    private List<PotionEffect> getPotionEffects(String apple) {
         List<PotionEffect> appleEffects = new ArrayList<>();
 
         ConfigurationSection sect = module().getConfigurationSection(apple + "-effects");
-        for(String key : sect.getKeys(false)){
+        for (String key : sect.getKeys(false)) {
             int duration = sect.getInt(key + ".duration");
             int amplifier = sect.getInt(key + ".amplifier");
 
@@ -166,15 +180,17 @@ public class ModuleGoldenApple extends Module {
         return appleEffects;
     }
 
-    private void applyEffects(LivingEntity target, List<PotionEffect> effects){
-        for(PotionEffect effect : effects){
+    private void applyEffects(LivingEntity target, List<PotionEffect> effects) {
+        for (PotionEffect effect : effects) {
             OptionalInt maxActiveAmplifier = target.getActivePotionEffects().stream()
-                    .filter(potionEffect -> potionEffect.getType() == effect.getType())
-                    .mapToInt(PotionEffect::getAmplifier)
-                    .max();
+              .filter(potionEffect -> potionEffect.getType() == effect.getType())
+              .mapToInt(PotionEffect::getAmplifier)
+              .max();
 
             // the active one is stronger, so do not apply the weaker one
-            if(maxActiveAmplifier.orElse(-1) > effect.getAmplifier()) continue;
+            if (maxActiveAmplifier.orElse(-1) > effect.getAmplifier()) {
+                continue;
+            }
 
             // remove it, as the active one is weaker
             maxActiveAmplifier.ifPresent(ignored -> target.removePotionEffect(effect.getType()));

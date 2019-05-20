@@ -9,11 +9,11 @@ import org.bukkit.entity.Player;
 
 public class PlaceholderAPIHook implements Hook {
     @Override
-    public void init(OCMMain plugin){
+    public void init(OCMMain plugin) {
         PlaceholderAPI.registerPlaceholderHook("ocm", new PlaceholderHook() {
             @Override
-            public String onPlaceholderRequest(Player player, String identifier){
-                if(identifier.equals("pvp_mode")){
+            public String onPlaceholderRequest(Player player, String identifier) {
+                if (identifier.equals("pvp_mode")) {
                     return PVPMode.getModeForPlayer(player).getName();
                 }
                 return null;

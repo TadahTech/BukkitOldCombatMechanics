@@ -3,7 +3,26 @@ package gvlfm78.plugin.OldCombatMechanics;
 import gvlfm78.plugin.OldCombatMechanics.hooks.PlaceholderAPIHook;
 import gvlfm78.plugin.OldCombatMechanics.hooks.api.Hook;
 import gvlfm78.plugin.OldCombatMechanics.module.Module;
-import gvlfm78.plugin.OldCombatMechanics.module.*;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleAttackCooldown;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleDisableBowBoost;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleDisableCrafting;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleDisableElytra;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleDisableEnderpearlCooldown;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleDisableOffHand;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleDisableProjectileRandomness;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleFishingKnockback;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleGoldenApple;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleNoLapisEnchantments;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleOldArmourStrength;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleOldBrewingStand;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleOldPotionEffects;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleOldToolDamage;
+import gvlfm78.plugin.OldCombatMechanics.module.ModulePlayerCollisions;
+import gvlfm78.plugin.OldCombatMechanics.module.ModulePlayerRegen;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleProjectileKnockback;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleShieldDamageReduction;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleSwordBlocking;
+import gvlfm78.plugin.OldCombatMechanics.module.ModuleSwordSweep;
 import gvlfm78.plugin.OldCombatMechanics.updater.ModuleUpdateChecker;
 import gvlfm78.plugin.OldCombatMechanics.utilities.Config;
 import gvlfm78.plugin.OldCombatMechanics.utilities.Messenger;
@@ -27,12 +46,12 @@ public class OCMMain extends JavaPlugin {
     private List<Runnable> enableListeners = new ArrayList<>();
     private List<Hook> hooks = new ArrayList<>();
 
-    public static OCMMain getInstance(){
+    public static OCMMain getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public void onEnable(){
+    public void onEnable() {
         INSTANCE = this;
 
         PluginDescriptionFile pdfFile = this.getDescription();
@@ -62,10 +81,10 @@ public class OCMMain extends JavaPlugin {
         Config.initialise(this);
 
         // MCStats Metrics
-        try{
+        try {
             MetricsLite metrics = new MetricsLite(this);
             metrics.start();
-        } catch(IOException e){
+        } catch (IOException e) {
             // Failed to submit the stats
         }
 
@@ -73,12 +92,12 @@ public class OCMMain extends JavaPlugin {
         Metrics metrics = new Metrics(this);
 
         metrics.addCustomChart(
-                new Metrics.SimpleBarChart(
-                        "enabled_modules",
-                        () -> ModuleLoader.getModules().stream()
-                                .filter(Module::isEnabled)
-                                .collect(Collectors.toMap(Module::toString, module -> 1))
-                )
+          new Metrics.SimpleBarChart(
+            "enabled_modules",
+            () -> ModuleLoader.getModules().stream()
+              .filter(Module::isEnabled)
+              .collect(Collectors.toMap(Module::toString, module -> 1))
+          )
         );
 
         enableListeners.forEach(Runnable::run);
@@ -89,7 +108,7 @@ public class OCMMain extends JavaPlugin {
     }
 
     @Override
-    public void onDisable(){
+    public void onDisable() {
 
         PluginDescriptionFile pdfFile = this.getDescription();
 
@@ -101,7 +120,7 @@ public class OCMMain extends JavaPlugin {
         logger.info(pdfFile.getName() + " v" + pdfFile.getVersion() + " has been disabled");
     }
 
-    private void registerModules(){
+    private void registerModules() {
         // Update Checker (also a module so we can use the dynamic registering/unregistering)
         ModuleLoader.addModule(new ModuleUpdateChecker(this, this.getFile()));
 
@@ -141,17 +160,17 @@ public class OCMMain extends JavaPlugin {
         ModuleLoader.addModule(new ModuleDisableEnderpearlCooldown(this));
     }
 
-    private void registerHooks(){
-        if(getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")){
+    private void registerHooks() {
+        if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             hooks.add(new PlaceholderAPIHook());
         }
     }
 
-    public void upgradeConfig(){
+    public void upgradeConfig() {
         CH.upgradeConfig();
     }
 
-    public boolean doesConfigExist(){
+    public boolean doesConfigExist() {
         return CH.doesConfigExist();
     }
 
@@ -160,15 +179,16 @@ public class OCMMain extends JavaPlugin {
      *
      * @param action the {@link Runnable} to run when the plugin gets disabled
      */
-    public void addDisableListener(Runnable action){
+    public void addDisableListener(Runnable action) {
         disableListeners.add(action);
     }
+
     /**
      * Registers a runnable to run when the plugin gets enabled.
      *
      * @param action the {@link Runnable} to run when the plugin gets enabled
      */
-    public void addEnableListener(Runnable action){
+    public void addEnableListener(Runnable action) {
         enableListeners.add(action);
     }
 }

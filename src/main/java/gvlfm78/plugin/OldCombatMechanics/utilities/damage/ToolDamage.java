@@ -16,19 +16,19 @@ public enum ToolDamage {
 
     private float damage;
 
-    ToolDamage(float damage){
+    ToolDamage(float damage) {
         this.damage = damage;
     }
 
-    public static float getDamage(String mat){
+    public static float getDamage(String mat) {
         return valueOf(mat).damage;
     }
 
-    public static float getDamage(Material mat){
+    public static float getDamage(Material mat) {
         return getDamage(mat.toString());
     }
 
-    public float getDamage(){
+    public float getDamage() {
         return damage;
     }
 }

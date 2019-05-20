@@ -25,7 +25,7 @@ public abstract class Module implements Listener {
      * @param plugin     the plugin instance
      * @param configName the name of the module in the config
      */
-    protected Module(OCMMain plugin, String configName){
+    protected Module(OCMMain plugin, String configName) {
         this.plugin = plugin;
         this.configName = configName;
         this.moduleName = getClass().getSimpleName();
@@ -37,7 +37,7 @@ public abstract class Module implements Listener {
      * @param world the world to check. Null to check whether it is globally disabled
      * @return true if the module is enabled in that world
      */
-    public boolean isEnabled(World world){
+    public boolean isEnabled(World world) {
         return Config.moduleEnabled(configName, world);
     }
 
@@ -46,7 +46,7 @@ public abstract class Module implements Listener {
      *
      * @return true if this module is globally enabled
      */
-    public boolean isEnabled(){
+    public boolean isEnabled() {
         return isEnabled(null);
     }
 
@@ -56,7 +56,7 @@ public abstract class Module implements Listener {
      * @param name the name of the setting
      * @return true if the setting with that name is enabled. Returns false if the setting did not exist.
      */
-    public boolean isSettingEnabled(String name){
+    public boolean isSettingEnabled(String name) {
         return plugin.getConfig().getBoolean(configName + "." + name, false);
     }
 
@@ -65,7 +65,7 @@ public abstract class Module implements Listener {
      *
      * @return the configuration section for this module
      */
-    public ConfigurationSection module(){
+    public ConfigurationSection module() {
         return plugin.getConfig().getConfigurationSection(configName);
     }
 
@@ -73,7 +73,7 @@ public abstract class Module implements Listener {
      * Called when the plugin is reloaded. Should re-read all relevant config keys and other resources that might have
      * changed.
      */
-    public void reload(){
+    public void reload() {
         // Intentionally left blank! Meant for individual modules to use.
     }
 
@@ -82,7 +82,7 @@ public abstract class Module implements Listener {
      *
      * @param text the message text
      */
-    protected void debug(String text){
+    protected void debug(String text) {
         Messenger.debug("[" + moduleName + "] " + text);
     }
 
@@ -92,14 +92,14 @@ public abstract class Module implements Listener {
      * @param text   the message text
      * @param sender the sender to send it to
      */
-    protected void debug(String text, CommandSender sender){
-        if(Config.debugEnabled()){
+    protected void debug(String text, CommandSender sender) {
+        if (Config.debugEnabled()) {
             Messenger.send(sender, "&8&l[&fDEBUG&8&l][&f" + moduleName + "&8&l]&7 " + text);
         }
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return WordUtils.capitalizeFully(configName.replaceAll("-", " "));
     }
 }

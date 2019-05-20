@@ -16,7 +16,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.AbstractList;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 public class NbtFactory {
@@ -40,9 +48,9 @@ public class NbtFactory {
     /**
      * Construct an instance of the NBT factory by deducing the class of NBTBase.
      */
-    private NbtFactory(){
-        if(BASE_CLASS == null){
-            try{
+    private NbtFactory() {
+        if (BASE_CLASS == null) {
+            try {
                 // Keep in mind that I do use hard-coded field names - but it's okay as long as we're dealing
                 // with CraftBukkit or its derivatives. This does not work in MCPC+ however.
                 ClassLoader loader = NbtFactory.class.getClassLoader();
@@ -65,7 +73,7 @@ public class NbtFactory {
 //                LOAD_COMPOUND = getMethod(Modifier.STATIC, 0, BASE_CLASS, null, DataInput.class);
 //                SAVE_COMPOUND = getMethod(Modifier.STATIC, 0, BASE_CLASS, null, BASE_CLASS, DataOutput.class);
 
-            } catch(ClassNotFoundException e){
+            } catch (ClassNotFoundException e) {
                 throw new IllegalStateException("Unable to find offline player.", e);
             }
         }
@@ -80,9 +88,10 @@ public class NbtFactory {
      *
      * @return The factory.
      */
-    private static NbtFactory get(){
-        if(INSTANCE == null)
+    private static NbtFactory get() {
+        if (INSTANCE == null) {
             INSTANCE = new NbtFactory();
+        }
         return INSTANCE;
     }
 
@@ -91,7 +100,7 @@ public class NbtFactory {
      *
      * @return The NBT list.
      */
-    public static NbtList createList(Object... content){
+    public static NbtList createList(Object... content) {
         return createList(Arrays.asList(content));
     }
 
@@ -100,14 +109,15 @@ public class NbtFactory {
      *
      * @return The NBT list.
      */
-    public static NbtList createList(Iterable<?> iterable){
+    public static NbtList createList(Iterable<?> iterable) {
         NbtList list = get().new NbtList(
-                INSTANCE.createNbtTag(NbtType.TAG_LIST, "", null)
+          INSTANCE.createNbtTag(NbtType.TAG_LIST, "", null)
         );
 
         // Add the content as well
-        for(Object obj : iterable)
+        for (Object obj : iterable) {
             list.add(obj);
+        }
         return list;
     }
 
@@ -117,9 +127,9 @@ public class NbtFactory {
      *
      * @return The NBT compound.
      */
-    public static NbtCompound createCompound(){
+    public static NbtCompound createCompound() {
         return get().new NbtCompound(
-                INSTANCE.createNbtTag(NbtType.TAG_COMPOUND, "", null)
+          INSTANCE.createNbtTag(NbtType.TAG_COMPOUND, "", null)
         );
     }
 
@@ -131,9 +141,9 @@ public class NbtFactory {
      * @param name - the name of the compound.
      * @return The NBT compound.
      */
-    public static NbtCompound createRootCompound(String name){
+    public static NbtCompound createRootCompound(String name) {
         return get().new NbtCompound(
-                INSTANCE.createNbtTag(NbtType.TAG_COMPOUND, name, null)
+          INSTANCE.createNbtTag(NbtType.TAG_COMPOUND, name, null)
         );
     }
 
@@ -143,7 +153,7 @@ public class NbtFactory {
      * @param nmsList - the NBT list.
      * @return The wrapper.
      */
-    public static NbtList fromList(Object nmsList){
+    public static NbtList fromList(Object nmsList) {
         return get().new NbtList(nmsList);
     }
 
@@ -153,7 +163,7 @@ public class NbtFactory {
      * @param nmsCompound - the NBT compund.
      * @return The wrapper.
      */
-    public static NbtCompound fromCompound(Object nmsCompound){
+    public static NbtCompound fromCompound(Object nmsCompound) {
         return get().new NbtCompound(nmsCompound);
     }
 
@@ -166,7 +176,7 @@ public class NbtFactory {
      * @param compound - the new NBT compound, or NULL to remove it.
      * @throws IllegalArgumentException If the stack is not a CraftItemStack, or it represents air.
      */
-    public static void setItemTag(ItemStack stack, NbtCompound compound){
+    public static void setItemTag(ItemStack stack, NbtCompound compound) {
         checkItemStack(stack);
         Object nms = getFieldValue(get().CRAFT_HANDLE, stack);
 
@@ -184,13 +194,13 @@ public class NbtFactory {
      * @param stack - the item stack.
      * @return A wrapper for its NBT tag.
      */
-    public static NbtCompound fromItemTag(ItemStack stack){
+    public static NbtCompound fromItemTag(ItemStack stack) {
         checkItemStack(stack);
         Object nms = getFieldValue(get().CRAFT_HANDLE, stack);
         Object tag = getFieldValue(get().STACK_TAG, nms);
 
         // Create the tag if it doesn't exist
-        if(tag == null){
+        if (tag == null) {
             NbtCompound compound = createRootCompound("tag");
             setItemTag(stack, compound);
             return compound;
@@ -204,16 +214,17 @@ public class NbtFactory {
      * @param stack - the stack to convert.
      * @return The CraftItemStack version.
      */
-    public static ItemStack getCraftItemStack(ItemStack stack){
+    public static ItemStack getCraftItemStack(ItemStack stack) {
         // Any need to convert?
-        if(stack == null || get().CRAFT_STACK.isAssignableFrom(stack.getClass()))
+        if (stack == null || get().CRAFT_STACK.isAssignableFrom(stack.getClass())) {
             return stack;
-        try{
+        }
+        try {
             // Call the private constructor
             Constructor<?> caller = INSTANCE.CRAFT_STACK.getDeclaredConstructor(ItemStack.class);
             caller.setAccessible(true);
             return (ItemStack) caller.newInstance(stack);
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new IllegalStateException("Unable to convert " + stack + " + to a CraftItemStack.");
         }
     }
@@ -223,13 +234,16 @@ public class NbtFactory {
      *
      * @param stack - the stack to check.
      */
-    private static void checkItemStack(ItemStack stack){
-        if(stack == null)
+    private static void checkItemStack(ItemStack stack) {
+        if (stack == null) {
             throw new IllegalArgumentException("Stack cannot be NULL.");
-        if(!get().CRAFT_STACK.isAssignableFrom(stack.getClass()))
+        }
+        if (!get().CRAFT_STACK.isAssignableFrom(stack.getClass())) {
             throw new IllegalArgumentException("Stack must be a CraftItemStack, found " + stack.getClass().getSimpleName());
-        if(stack.getType() == Material.AIR)
+        }
+        if (stack.getType() == Material.AIR) {
             throw new IllegalArgumentException("ItemStacks representing air cannot store NMS information.");
+        }
     }
 
     /**
@@ -240,18 +254,18 @@ public class NbtFactory {
      * @param params - the parameters to supply.
      * @return The result of the method.
      */
-    private static Object invokeMethod(Method method, Object target, Object... params){
-        try{
+    private static Object invokeMethod(Method method, Object target, Object... params) {
+        try {
             return method.invoke(target, params);
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Unable to invoke method " + method + " for " + target, e);
         }
     }
 
-    private static void setFieldValue(Field field, Object target, Object value){
-        try{
+    private static void setFieldValue(Field field, Object target, Object value) {
+        try {
             field.set(target, value);
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Unable to set " + field + " for " + target, e);
         }
     }
@@ -322,10 +336,10 @@ public class NbtFactory {
 //            }
 //        }
 //    }
-    private static Object getFieldValue(Field field, Object target){
-        try{
+    private static Object getFieldValue(Field field, Object target) {
+        try {
             return field.get(target);
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Unable to retrieve " + field + " for " + target, e);
         }
     }
@@ -340,23 +354,24 @@ public class NbtFactory {
      * @return The first method by this name.
      * @throws IllegalStateException If we cannot find this method.
      */
-    private static Method getMethod(int requireMod, int bannedMod, Class<?> clazz, String methodName, Class<?>... params){
-        for(Method method : clazz.getDeclaredMethods()){
+    private static Method getMethod(int requireMod, int bannedMod, Class<?> clazz, String methodName, Class<?>... params) {
+        for (Method method : clazz.getDeclaredMethods()) {
             // Limitation: Doesn't handle overloads
-            if((method.getModifiers() & requireMod) == requireMod &&
-                    (method.getModifiers() & bannedMod) == 0 &&
-                    (methodName == null || method.getName().equals(methodName)) &&
-                    Arrays.equals(method.getParameterTypes(), params)){
+            if ((method.getModifiers() & requireMod) == requireMod &&
+              (method.getModifiers() & bannedMod) == 0 &&
+              (methodName == null || method.getName().equals(methodName)) &&
+              Arrays.equals(method.getParameterTypes(), params)) {
 
                 method.setAccessible(true);
                 return method;
             }
         }
         // Search in every superclass
-        if(clazz.getSuperclass() != null)
+        if (clazz.getSuperclass() != null) {
             return getMethod(requireMod, bannedMod, clazz.getSuperclass(), methodName, params);
+        }
         throw new IllegalStateException(String.format(
-                "Unable to find method %s (%s).", methodName, Arrays.asList(params)));
+          "Unable to find method %s (%s).", methodName, Arrays.asList(params)));
     }
 
     /**
@@ -368,32 +383,34 @@ public class NbtFactory {
      * @return The first field by this name.
      * @throws IllegalStateException If we cannot find this field.
      */
-    private static Field getField(Object instance, Class<?> clazz, String fieldName){
-        if(clazz == null)
+    private static Field getField(Object instance, Class<?> clazz, String fieldName) {
+        if (clazz == null) {
             clazz = instance.getClass();
+        }
         // Ignore access rules
-        for(Field field : clazz.getDeclaredFields()){
-            if(field.getName().equals(fieldName)){
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.getName().equals(fieldName)) {
                 field.setAccessible(true);
                 return field;
             }
         }
         // Recursively fild the correct field
-        if(clazz.getSuperclass() != null)
+        if (clazz.getSuperclass() != null) {
             return getField(instance, clazz.getSuperclass(), fieldName);
+        }
         throw new IllegalStateException("Unable to find field " + fieldName + " in " + instance);
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getDataMap(Object handle){
+    private Map<String, Object> getDataMap(Object handle) {
         return (Map<String, Object>) getFieldValue(
-                getDataField(NbtType.TAG_COMPOUND, handle), handle);
+          getDataField(NbtType.TAG_COMPOUND, handle), handle);
     }
 
     @SuppressWarnings("unchecked")
-    private List<Object> getDataList(Object handle){
+    private List<Object> getDataList(Object handle) {
         return (List<Object>) getFieldValue(
-                getDataField(NbtType.TAG_LIST, handle), handle);
+          getDataField(NbtType.TAG_LIST, handle), handle);
     }
 
     /**
@@ -403,16 +420,17 @@ public class NbtFactory {
      * @param value - the value of the element to create. Can be a List or a Map.
      * @return The NBT element.
      */
-    private Object unwrapValue(String name, Object value){
-        if(value == null)
+    private Object unwrapValue(String name, Object value) {
+        if (value == null) {
             return null;
+        }
 
-        if(value instanceof Wrapper){
+        if (value instanceof Wrapper) {
             return ((Wrapper) value).getHandle();
 
-        } else if(value instanceof List){
+        } else if (value instanceof List) {
             throw new IllegalArgumentException("Can only insert a WrappedList.");
-        } else if(value instanceof Map){
+        } else if (value instanceof Map) {
             throw new IllegalArgumentException("Can only insert a WrappedCompound.");
 
         } else {
@@ -428,15 +446,16 @@ public class NbtFactory {
      * @param nms - the NBT element.
      * @return The wrapper equivalent.
      */
-    private Object wrapNative(Object nms){
-        if(nms == null)
+    private Object wrapNative(Object nms) {
+        if (nms == null) {
             return null;
+        }
 
-        if(BASE_CLASS.isAssignableFrom(nms.getClass())){
+        if (BASE_CLASS.isAssignableFrom(nms.getClass())) {
             final NbtType type = getNbtType(nms);
 
             // Handle the different types
-            switch(type){
+            switch (type) {
                 case TAG_COMPOUND:
                     return new NbtCompound(nms);
                 case TAG_LIST:
@@ -456,10 +475,10 @@ public class NbtFactory {
      * @param value - the value, or NULL to keep the original value.
      * @return The created tag.
      */
-    private Object createNbtTag(NbtType type, String name, Object value){
+    private Object createNbtTag(NbtType type, String name, Object value) {
         Object tag = invokeMethod(NBT_CREATE_TAG, null, (byte) type.id);
 
-        if(value != null){
+        if (value != null) {
             setFieldValue(getDataField(type, tag), tag, value);
         }
         return tag;
@@ -472,9 +491,10 @@ public class NbtFactory {
      * @param nms  - the NBT class instance.
      * @return The corresponding field.
      */
-    private Field getDataField(NbtType type, Object nms){
-        if(DATA_FIELD[type.id] == null)
+    private Field getDataField(NbtType type, Object nms) {
+        if (DATA_FIELD[type.id] == null) {
             DATA_FIELD[type.id] = getField(nms, null, type.getFieldName());
+        }
         return DATA_FIELD[type.id];
     }
 
@@ -484,7 +504,7 @@ public class NbtFactory {
      * @param nms - the native NBT tag.
      * @return The corresponding type.
      */
-    private NbtType getNbtType(Object nms){
+    private NbtType getNbtType(Object nms) {
         int type = (Byte) invokeMethod(NBT_GET_TYPE, nms);
         return NBT_ENUM.get(type);
     }
@@ -495,15 +515,16 @@ public class NbtFactory {
      * @param primitive - the primitive type.
      * @return The corresponding type.
      */
-    private NbtType getPrimitiveType(Object primitive){
+    private NbtType getPrimitiveType(Object primitive) {
         NbtType type = NBT_ENUM.get(NBT_CLASS.inverse().get(
-                Primitives.unwrap(primitive.getClass())
+          Primitives.unwrap(primitive.getClass())
         ));
 
         // Display the illegal value at least
-        if(type == null)
+        if (type == null) {
             throw new IllegalArgumentException(String.format(
-                    "Illegal type: %s (%s)", primitive.getClass(), primitive));
+              "Illegal type: %s (%s)", primitive.getClass(), primitive));
+        }
         return type;
     }
 
@@ -534,19 +555,20 @@ public class NbtFactory {
         // Unique NBT id
         public final int id;
 
-        NbtType(int id, Class<?> type){
+        NbtType(int id, Class<?> type) {
             this.id = id;
             NBT_CLASS.put(id, type);
             NBT_ENUM.put(id, this);
         }
 
-        private String getFieldName(){
-            if(this == TAG_COMPOUND)
+        private String getFieldName() {
+            if (this == TAG_COMPOUND) {
                 return "map";
-            else if(this == TAG_LIST)
+            } else if (this == TAG_LIST) {
                 return "list";
-            else
+            } else {
                 return "data";
+            }
         }
     }
 
@@ -584,63 +606,65 @@ public class NbtFactory {
      * @author Kristian
      */
     public final class NbtCompound extends ConvertedMap {
-        private NbtCompound(Object handle){
+        private NbtCompound(Object handle) {
             super(handle, getDataMap(handle));
         }
 
         // Simplifiying access to each value
-        public Byte getByte(String key, Byte defaultValue){
+        public Byte getByte(String key, Byte defaultValue) {
             return containsKey(key) ? (Byte) get(key) : defaultValue;
         }
 
-        public Short getShort(String key, Short defaultValue){
+        public Short getShort(String key, Short defaultValue) {
             return containsKey(key) ? (Short) get(key) : defaultValue;
         }
 
-        public Integer getInteger(String key, Integer defaultValue){
+        public Integer getInteger(String key, Integer defaultValue) {
             return containsKey(key) ? (Integer) get(key) : defaultValue;
         }
 
-        public Long getLong(String key, Long defaultValue){
+        public Long getLong(String key, Long defaultValue) {
             return containsKey(key) ? (Long) get(key) : defaultValue;
         }
 
-        public Float getFloat(String key, Float defaultValue){
+        public Float getFloat(String key, Float defaultValue) {
             return containsKey(key) ? (Float) get(key) : defaultValue;
         }
 
-        public Double getDouble(String key, Double defaultValue){
+        public Double getDouble(String key, Double defaultValue) {
             return containsKey(key) ? (Double) get(key) : defaultValue;
         }
 
-        public String getString(String key, String defaultValue){
+        public String getString(String key, String defaultValue) {
             return containsKey(key) ? (String) get(key) : defaultValue;
         }
 
-        public byte[] getByteArray(String key, byte[] defaultValue){
+        public byte[] getByteArray(String key, byte[] defaultValue) {
             return containsKey(key) ? (byte[]) get(key) : defaultValue;
         }
 
-        public int[] getIntegerArray(String key, int[] defaultValue){
+        public int[] getIntegerArray(String key, int[] defaultValue) {
             return containsKey(key) ? (int[]) get(key) : defaultValue;
         }
 
         /**
          * Method for when items are not created following NBTtag convention and have Integers where there should be Longs
          */
-        public Long getIntegerOrLong(String key, Long defaultValue){
-            if(!containsKey(key)) return defaultValue;
+        public Long getIntegerOrLong(String key, Long defaultValue) {
+            if (!containsKey(key)) {
+                return defaultValue;
+            }
 
             //Try casting to long; if doesn't work try casting to integer, if successful convert Int to Long and return
             Long resultingValue = defaultValue;
 
-            try{
+            try {
                 resultingValue = (Long) get(key);
-            } catch(ClassCastException e){
+            } catch (ClassCastException e) {
                 //It's not a long, try casting to integer
-                try{
+                try {
                     resultingValue = ((Integer) get(key)).longValue();
-                } catch(ClassCastException e1){
+                } catch (ClassCastException e1) {
                     System.out.println("NBT value was neither a Long or an Integer");
                     e1.printStackTrace();
                 }
@@ -656,11 +680,12 @@ public class NbtFactory {
          * @param createNew - whether or not to create a new list if its missing.
          * @return An existing list, a new list or NULL.
          */
-        public NbtList getList(String key, boolean createNew){
+        public NbtList getList(String key, boolean createNew) {
             NbtList list = (NbtList) get(key);
 
-            if(list == null)
+            if (list == null) {
                 put(key, list = createList());
+            }
             return list;
         }
 
@@ -671,7 +696,7 @@ public class NbtFactory {
          * @param createNew - whether or not to create a new map if its missing.
          * @return An existing map, a new map or NULL.
          */
-        public NbtCompound getMap(String key, boolean createNew){
+        public NbtCompound getMap(String key, boolean createNew) {
             return getMap(Collections.singletonList(key), createNew);
         }
         // Done
@@ -686,7 +711,7 @@ public class NbtFactory {
          * @param value - the new value of this entry.
          * @return This compound, for chaining.
          */
-        public NbtCompound putPath(String path, Object value){
+        public NbtCompound putPath(String path, Object value) {
             List<String> entries = getPathElements(path);
             Map<String, Object> map = getMap(entries.subList(0, entries.size() - 1), true);
 
@@ -704,11 +729,11 @@ public class NbtFactory {
          * @return The value, or NULL if not found.
          */
         @SuppressWarnings("unchecked")
-        public <T> T getPath(String path){
+        public <T> T getPath(String path) {
             List<String> entries = getPathElements(path);
             NbtCompound map = getMap(entries.subList(0, entries.size() - 1), false);
 
-            if(map != null){
+            if (map != null) {
                 return (T) map.get(entries.get(entries.size() - 1));
             }
             return null;
@@ -733,15 +758,16 @@ public class NbtFactory {
          * @param createNew - whether or not to create new compounds on the way.
          * @return The map at this location.
          */
-        private NbtCompound getMap(Iterable<String> path, boolean createNew){
+        private NbtCompound getMap(Iterable<String> path, boolean createNew) {
             NbtCompound current = this;
 
-            for(String entry : path){
+            for (String entry : path) {
                 NbtCompound child = (NbtCompound) current.get(entry);
 
-                if(child == null){
-                    if(!createNew)
+                if (child == null) {
+                    if (!createNew) {
                         throw new IllegalArgumentException("Cannot find " + entry + " in " + path);
+                    }
                     current.put(entry, child = createCompound());
                 }
                 current = child;
@@ -755,7 +781,7 @@ public class NbtFactory {
          * @param path - the path to split.
          * @return The elements.
          */
-        private List<String> getPathElements(String path){
+        private List<String> getPathElements(String path) {
             return Lists.newArrayList(Splitter.on(".").omitEmptyStrings().split(path));
         }
     }
@@ -770,7 +796,7 @@ public class NbtFactory {
      * @author Kristian
      */
     public final class NbtList extends ConvertedList {
-        private NbtList(Object handle){
+        private NbtList(Object handle) {
             super(handle, getDataList(handle));
         }
     }
@@ -784,15 +810,15 @@ public class NbtFactory {
         // Don't recreate wrapper objects
         private final ConcurrentMap<Object, Object> cache = new MapMaker().weakKeys().makeMap();
 
-        public Object wrap(Object value){
+        public Object wrap(Object value) {
             Object current = cache.get(value);
 
-            if(current == null){
+            if (current == null) {
                 current = wrapNative(value);
 
                 // Only cache composite objects
-                if(current instanceof ConvertedMap ||
-                        current instanceof ConvertedList){
+                if (current instanceof ConvertedMap ||
+                  current instanceof ConvertedList) {
                     cache.put(value, current);
                 }
             }
@@ -812,50 +838,50 @@ public class NbtFactory {
 
         private final CachedNativeWrapper cache = new CachedNativeWrapper();
 
-        public ConvertedMap(Object handle, Map<String, Object> original){
+        public ConvertedMap(Object handle, Map<String, Object> original) {
             this.handle = handle;
             this.original = original;
         }
 
         // For converting back and forth
-        protected Object wrapOutgoing(Object value){
+        protected Object wrapOutgoing(Object value) {
             return cache.wrap(value);
         }
 
-        protected Object unwrapIncoming(String key, Object wrapped){
+        protected Object unwrapIncoming(String key, Object wrapped) {
             return unwrapValue(key, wrapped);
         }
 
         // Modification
         @Override
-        public Object put(String key, Object value){
+        public Object put(String key, Object value) {
             return wrapOutgoing(original.put(
-                    key,
-                    unwrapIncoming(key, value)
+              key,
+              unwrapIncoming(key, value)
             ));
         }
 
         // Performance
         @Override
-        public Object get(Object key){
+        public Object get(Object key) {
             return wrapOutgoing(original.get(key));
         }
 
         @Override
-        public Object remove(Object key){
+        public Object remove(Object key) {
             return wrapOutgoing(original.remove(key));
         }
 
         @Override
-        public boolean containsKey(Object key){
+        public boolean containsKey(Object key) {
             return original.containsKey(key);
         }
 
         @Override
-        public Set<Entry<String, Object>> entrySet(){
+        public Set<Entry<String, Object>> entrySet() {
             return new AbstractSet<Entry<String, Object>>() {
                 @Override
-                public boolean add(Entry<String, Object> e){
+                public boolean add(Entry<String, Object> e) {
                     String key = e.getKey();
                     Object value = e.getValue();
 
@@ -864,43 +890,43 @@ public class NbtFactory {
                 }
 
                 @Override
-                public int size(){
+                public int size() {
                     return original.size();
                 }
 
                 @Override
-                public Iterator<Entry<String, Object>> iterator(){
+                public Iterator<Entry<String, Object>> iterator() {
                     return ConvertedMap.this.iterator();
                 }
             };
         }
 
-        private Iterator<Entry<String, Object>> iterator(){
+        private Iterator<Entry<String, Object>> iterator() {
             final Iterator<Entry<String, Object>> proxy = original.entrySet().iterator();
 
             return new Iterator<Entry<String, Object>>() {
 
-                public boolean hasNext(){
+                public boolean hasNext() {
                     return proxy.hasNext();
                 }
 
 
-                public Entry<String, Object> next(){
+                public Entry<String, Object> next() {
                     Entry<String, Object> entry = proxy.next();
 
                     return new SimpleEntry<>(
-                            entry.getKey(), wrapOutgoing(entry.getValue())
+                      entry.getKey(), wrapOutgoing(entry.getValue())
                     );
                 }
 
 
-                public void remove(){
+                public void remove() {
                     proxy.remove();
                 }
             };
         }
 
-        public Object getHandle(){
+        public Object getHandle() {
             return handle;
         }
     }
@@ -917,59 +943,61 @@ public class NbtFactory {
         private final List<Object> original;
         private final CachedNativeWrapper cache = new CachedNativeWrapper();
 
-        public ConvertedList(Object handle, List<Object> original){
-            if(NBT_LIST_TYPE == null)
+        public ConvertedList(Object handle, List<Object> original) {
+            if (NBT_LIST_TYPE == null) {
                 NBT_LIST_TYPE = getField(handle, null, "type");
+            }
             this.handle = handle;
             this.original = original;
         }
 
-        protected Object wrapOutgoing(Object value){
+        protected Object wrapOutgoing(Object value) {
             return cache.wrap(value);
         }
 
-        protected Object unwrapIncoming(Object wrapped){
+        protected Object unwrapIncoming(Object wrapped) {
             return unwrapValue("", wrapped);
         }
 
         @Override
-        public Object get(int index){
+        public Object get(int index) {
             return wrapOutgoing(original.get(index));
         }
 
         @Override
-        public int size(){
+        public int size() {
             return original.size();
         }
 
         @Override
-        public Object set(int index, Object element){
+        public Object set(int index, Object element) {
             return wrapOutgoing(
-                    original.set(index, unwrapIncoming(element))
+              original.set(index, unwrapIncoming(element))
             );
         }
 
         @Override
-        public void add(int index, Object element){
+        public void add(int index, Object element) {
             Object nbt = unwrapIncoming(element);
 
             // Set the list type if its the first element
-            if(size() == 0)
+            if (size() == 0) {
                 setFieldValue(NBT_LIST_TYPE, handle, (byte) getNbtType(nbt).id);
+            }
             original.add(index, nbt);
         }
 
         @Override
-        public Object remove(int index){
+        public Object remove(int index) {
             return wrapOutgoing(original.remove(index));
         }
 
         @Override
-        public boolean remove(Object o){
+        public boolean remove(Object o) {
             return original.remove(unwrapIncoming(o));
         }
 
-        public Object getHandle(){
+        public Object getHandle() {
             return handle;
         }
     }

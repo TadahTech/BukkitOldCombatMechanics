@@ -13,17 +13,19 @@ import java.util.Locale;
  */
 public class ModuleProjectileKnockback extends Module {
 
-    public ModuleProjectileKnockback(OCMMain plugin){
+    public ModuleProjectileKnockback(OCMMain plugin) {
         super(plugin, "projectile-knockback");
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
-    public void onEntityHit(EntityDamageByEntityEvent e){
-        if(!isEnabled(e.getEntity().getWorld())) return;
+    public void onEntityHit(EntityDamageByEntityEvent e) {
+        if (!isEnabled(e.getEntity().getWorld())) {
+            return;
+        }
 
         EntityType type = e.getDamager().getType();
 
-        switch(type){
+        switch (type) {
             case SNOWBALL:
             case EGG:
             case ENDER_PEARL:

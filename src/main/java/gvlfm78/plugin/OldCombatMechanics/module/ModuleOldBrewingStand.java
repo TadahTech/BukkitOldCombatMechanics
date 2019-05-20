@@ -15,25 +15,27 @@ import org.bukkit.inventory.Inventory;
  */
 public class ModuleOldBrewingStand extends Module {
 
-    public ModuleOldBrewingStand(OCMMain plugin){
+    public ModuleOldBrewingStand(OCMMain plugin) {
         super(plugin, "old-brewing-stand");
     }
 
     @EventHandler
-    public void onBrew(BrewEvent e){
+    public void onBrew(BrewEvent e) {
         Block block = e.getBlock();
 
-        if(!isEnabled(block.getWorld()))
+        if (!isEnabled(block.getWorld())) {
             return;
+        }
 
         BlockState blockState = block.getState();
 
         refuel(blockState);
     }
 
-    private void refuel(BlockState blockState){
-        if(!(blockState instanceof BrewingStand))
+    private void refuel(BlockState blockState) {
+        if (!(blockState instanceof BrewingStand)) {
             return;
+        }
 
         BrewingStand brewingStand = (BrewingStand) blockState;
 
@@ -42,23 +44,28 @@ public class ModuleOldBrewingStand extends Module {
     }
 
     @EventHandler
-    public void onInventoryOpen(InventoryOpenEvent e){
-        if(!isEnabled(e.getPlayer().getWorld()))
+    public void onInventoryOpen(InventoryOpenEvent e) {
+        if (!isEnabled(e.getPlayer().getWorld())) {
             return;
+        }
 
         Inventory inv = e.getInventory();
 
-        if(inv == null) return;
+        if (inv == null) {
+            return;
+        }
 
         Location loc = null;
 
         // TODO: Why is this needed? It should just return null
-        try{
+        try {
             loc = inv.getLocation();
-        } catch(Exception ignored){
+        } catch (Exception ignored) {
         }
 
-        if(loc == null) return;
+        if (loc == null) {
+            return;
+        }
 
         Block block = loc.getBlock();
 

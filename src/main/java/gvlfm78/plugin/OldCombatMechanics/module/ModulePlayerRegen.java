@@ -23,34 +23,37 @@ public class ModulePlayerRegen extends Module {
     private Map<UUID, Long> healTimes = new HashMap<>();
     private boolean spartanInstalled;
 
-    public ModulePlayerRegen(OCMMain plugin){
+    public ModulePlayerRegen(OCMMain plugin) {
         super(plugin, "old-player-regen");
 
         initSpartan();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onRegen(EntityRegainHealthEvent e){
+    public void onRegen(EntityRegainHealthEvent e) {
 
-        if(e.getEntityType() != EntityType.PLAYER || e.getRegainReason() != EntityRegainHealthEvent.RegainReason.SATIATED){
+        if (e.getEntityType() != EntityType.PLAYER || e.getRegainReason() != EntityRegainHealthEvent.RegainReason.SATIATED) {
             return;
         }
 
         final Player p = (Player) e.getEntity();
 
-        if(!isEnabled(p.getWorld())) return;
+        if (!isEnabled(p.getWorld())) {
+            return;
+        }
 
         e.setCancelled(true);
 
         long currentTime = System.currentTimeMillis() / 1000;
         long lastHealTime = getLastHealTime(p);
 
-        if(currentTime - lastHealTime < module().getLong("frequency"))
+        if (currentTime - lastHealTime < module().getLong("frequency")) {
             return;
+        }
 
         double maxHealth = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 
-        if(p.getHealth() < maxHealth){
+        if (p.getHealth() < maxHealth) {
             p.setHealth(MathHelper.clamp(p.getHealth() + module().getInt("amount"), 0.0, maxHealth));
             healTimes.put(p.getUniqueId(), currentTime);
 
@@ -67,12 +70,12 @@ public class ModulePlayerRegen extends Module {
         }, 1L);
     }
 
-    private long getLastHealTime(Player p){
+    private long getLastHealTime(Player p) {
         return healTimes.computeIfAbsent(p.getUniqueId(), id -> System.currentTimeMillis() / 1000);
     }
 
-    private void disableSpartanRegenCheck(Player player){
-        if(!spartanInstalled){
+    private void disableSpartanRegenCheck(Player player) {
+        if (!spartanInstalled) {
             return;
         }
 
@@ -80,7 +83,7 @@ public class ModulePlayerRegen extends Module {
         me.vagdedes.spartan.api.API.cancelCheck(player, Enums.HackType.FastHeal, ticksToCancel);
     }
 
-    private void initSpartan(){
+    private void initSpartan() {
         spartanInstalled = Bukkit.getPluginManager().getPlugin("Spartan") != null;
     }
 }

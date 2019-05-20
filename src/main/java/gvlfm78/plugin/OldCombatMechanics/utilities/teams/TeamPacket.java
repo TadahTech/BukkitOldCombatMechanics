@@ -11,13 +11,13 @@ import java.util.Set;
 public class TeamPacket {
     private Object packetShallowClone;
 
-    TeamPacket(Object packet){
+    TeamPacket(Object packet) {
         this.packetShallowClone = packet;
     }
 
-    public TeamPacket(){
+    public TeamPacket() {
         this(TeamUtils.createTeamNMSPacket(
-                TeamAction.CREATE, CollisionRule.NEVER, "placeholder", Collections.emptyList()
+          TeamAction.CREATE, CollisionRule.NEVER, "placeholder", Collections.emptyList()
         ));
     }
 
@@ -26,8 +26,8 @@ public class TeamPacket {
      *
      * @param updatePacket the sent team packet
      */
-    public void adjustToUpdate(Object updatePacket){
-        switch(TeamUtils.getPacketAction(updatePacket)){
+    public void adjustToUpdate(Object updatePacket) {
+        switch (TeamUtils.getPacketAction(updatePacket)) {
             case CREATE:
                 cloneFrom(updatePacket);
                 break;
@@ -51,7 +51,7 @@ public class TeamPacket {
      *
      * @return true if this team still exists
      */
-    public boolean teamExists(){
+    public boolean teamExists() {
         return packetShallowClone != null;
     }
 
@@ -60,7 +60,7 @@ public class TeamPacket {
      *
      * @param collisionRule the collision rule
      */
-    public void setCollisionRule(CollisionRule collisionRule){
+    public void setCollisionRule(CollisionRule collisionRule) {
         TeamUtils.setCollisionRule(packetShallowClone, collisionRule);
     }
 
@@ -69,7 +69,7 @@ public class TeamPacket {
      *
      * @param teamAction the team action
      */
-    public void setTeamAction(TeamAction teamAction){
+    public void setTeamAction(TeamAction teamAction) {
         TeamUtils.setPacketAction(packetShallowClone, teamAction);
     }
 
@@ -78,11 +78,11 @@ public class TeamPacket {
      *
      * @param player the player to send it to
      */
-    public void send(Player player){
+    public void send(Player player) {
         Reflector.Packets.sendPacket(player, packetShallowClone);
     }
 
-    private void adjustToPlayerAdded(Object updatePacket){
+    private void adjustToPlayerAdded(Object updatePacket) {
         Set<String> newMembers = new HashSet<>(TeamUtils.getTeamMembers(packetShallowClone));
 
         newMembers.addAll(TeamUtils.getTeamMembers(updatePacket));
@@ -90,20 +90,20 @@ public class TeamPacket {
         TeamUtils.setTeamMembers(packetShallowClone, newMembers);
     }
 
-    private void adjustToPlayerRemoved(Object updatePacket){
+    private void adjustToPlayerRemoved(Object updatePacket) {
         Set<String> newMembers = new HashSet<>(TeamUtils.getTeamMembers(packetShallowClone));
         newMembers.removeAll(TeamUtils.getTeamMembers(updatePacket));
 
         TeamUtils.setTeamMembers(packetShallowClone, newMembers);
     }
 
-    private void cloneFrom(Object packet){
-        try{
-            for(Field declaredField : packet.getClass().getDeclaredFields()){
+    private void cloneFrom(Object packet) {
+        try {
+            for (Field declaredField : packet.getClass().getDeclaredFields()) {
                 declaredField.setAccessible(true);
                 declaredField.set(packetShallowClone, declaredField.get(packet));
             }
-        } catch(IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             throw new RuntimeException("Error cloning packet", e);
         }
     }

@@ -19,7 +19,7 @@ abstract class AbstractSweepPacketDetector implements SweepPacketDetector {
      * @param packet the packet
      * @return true if it is of the correct type
      */
-    boolean isWrongPacketType(Packet packet){
+    boolean isWrongPacketType(Packet packet) {
         return packet.getPacketClass() != PACKET_CLASS;
     }
 
@@ -30,10 +30,10 @@ abstract class AbstractSweepPacketDetector implements SweepPacketDetector {
      * @param handle the handle
      * @return null if an error occurred, the result otherwise
      */
-    Object tryGetField(Field field, Object handle){
-        try{
+    Object tryGetField(Field field, Object handle) {
+        try {
             return field.get(handle);
-        } catch(IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             OCMMain.getInstance().getLogger().log(Level.INFO, "Error getting field " + field, e);
         }
         return null;
@@ -44,10 +44,10 @@ abstract class AbstractSweepPacketDetector implements SweepPacketDetector {
      *
      * @param name the name of the element
      */
-    void throwNewElementNotFoundException(String name){
+    void throwNewElementNotFoundException(String name) {
         throw new IllegalStateException(
-                "Couldn't find " + name + ". Please report this on github. I am running server version "
-                        + Bukkit.getServer().getVersion()
+          "Couldn't find " + name + ". Please report this on github. I am running server version "
+            + Bukkit.getServer().getVersion()
         );
     }
 }

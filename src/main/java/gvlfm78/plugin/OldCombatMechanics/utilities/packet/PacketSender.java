@@ -14,32 +14,32 @@ import java.util.Objects;
 class PacketSender {
 
     private static final Class<?> CRAFT_PLAYER =
-            Objects.requireNonNull(Reflector.getClass(ClassType.CRAFTBUKKIT, "entity.CraftPlayer"));
+      Objects.requireNonNull(Reflector.getClass(ClassType.CRAFTBUKKIT, "entity.CraftPlayer"));
     private static final Class<?> PLAYER_CONNECTION =
-            Objects.requireNonNull(Reflector.getClass(ClassType.NMS, "PlayerConnection"));
+      Objects.requireNonNull(Reflector.getClass(ClassType.NMS, "PlayerConnection"));
     private static final Class<?> ENTITY_PLAYER =
-            Objects.requireNonNull(Reflector.getClass(ClassType.NMS, "EntityPlayer"));
+      Objects.requireNonNull(Reflector.getClass(ClassType.NMS, "EntityPlayer"));
 
 
     private static final Method GET_HANDLE = Reflector.getMethod(
-            CRAFT_PLAYER, "getHandle"
+      CRAFT_PLAYER, "getHandle"
     );
     private static final Method SEND_PACKET = Reflector.getMethod(
-            PLAYER_CONNECTION, "sendPacket"
+      PLAYER_CONNECTION, "sendPacket"
     );
     private static final Field PLAYER_CONNECTION_FIELD = Reflector.getField(
-            ENTITY_PLAYER, "playerConnection"
+      ENTITY_PLAYER, "playerConnection"
     );
 
     private static final PacketSender instance = new PacketSender();
 
-    private PacketSender(){
+    private PacketSender() {
     }
 
     /**
      * @return The Instance of the PacketSender
      */
-    static PacketSender getInstance(){
+    static PacketSender getInstance() {
         return instance;
     }
 
@@ -49,11 +49,11 @@ class PacketSender {
      * @param packet The {@link Packet} to send
      * @param player The Player to send it to
      */
-    void sendPacket(Packet packet, Player player){
+    void sendPacket(Packet packet, Player player) {
         sendPacket(packet.getNMSPacket(), getConnection(player));
     }
 
-    private void sendPacket(Object nmsPacket, Object playerConnection){
+    private void sendPacket(Object nmsPacket, Object playerConnection) {
         Reflector.invokeMethod(SEND_PACKET, playerConnection, nmsPacket);
     }
 
@@ -63,7 +63,7 @@ class PacketSender {
      * @param player The Player to get the Connection for
      * @return The Player's connection
      */
-    Object getConnection(Player player){
+    Object getConnection(Player player) {
         Object handle = Reflector.invokeMethod(GET_HANDLE, player);
 
         return Reflector.getFieldValue(PLAYER_CONNECTION_FIELD, handle);

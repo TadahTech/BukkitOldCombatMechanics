@@ -9,12 +9,12 @@ import org.bukkit.inventory.ItemStack;
 public class MaterialRegistry {
 
     public static VersionedMaterial LAPIS_LAZULI = new DualVersionedMaterial(
-            () -> new ItemStack(Material.matchMaterial("INK_SACK"), 1, (short) 4),
-            () -> new ItemStack(Material.matchMaterial("LAPIS_LAZULI"))
+      () -> new ItemStack(Material.matchMaterial("INK_SACK"), 1, (short) 4),
+      () -> new ItemStack(Material.matchMaterial("LAPIS_LAZULI"))
     );
 
     public static VersionedMaterial ENCHANTED_GOLDEN_APPLE = new DualVersionedMaterial(
-            () -> new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
-            () -> new ItemStack(Material.valueOf("ENCHANTED_GOLDEN_APPLE"))
+      () -> new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
+      () -> new ItemStack(Material.valueOf("ENCHANTED_GOLDEN_APPLE"))
     );
 }

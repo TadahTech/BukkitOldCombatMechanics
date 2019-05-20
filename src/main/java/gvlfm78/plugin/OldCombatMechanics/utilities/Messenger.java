@@ -16,15 +16,15 @@ public class Messenger {
     static boolean DEBUG_ENABLED = false;
     private static OCMMain plugin;
 
-    public static void initialise(OCMMain plugin){
+    public static void initialise(OCMMain plugin) {
         Messenger.plugin = plugin;
     }
 
-    public static void info(String message, Object... args){
+    public static void info(String message, Object... args) {
         plugin.getLogger().info(TextUtils.stripColor(String.format(message, args)));
     }
 
-    public static void warn(Throwable e, String message, Object... args){
+    public static void warn(Throwable e, String message, Object... args) {
         plugin.getLogger().log(Level.WARNING, TextUtils.stripColor(String.format(message, args)), e);
     }
 
@@ -35,25 +35,31 @@ public class Messenger {
      * @param message The message to send.
      * @param args    The args to format the message with.
      */
-    public static void send(CommandSender sender, String message, Object... args){
+    public static void send(CommandSender sender, String message, Object... args) {
         Objects.requireNonNull(sender, "sender cannot be null!");
         Objects.requireNonNull(message, "message cannot be null!");
 
         sender.sendMessage(TextUtils.colorize(String.format(message, args)));
     }
 
-    public static void debug(String message, Throwable throwable){
-        if(!DEBUG_ENABLED) return;
+    public static void debug(String message, Throwable throwable) {
+        if (!DEBUG_ENABLED) {
+            return;
+        }
         plugin.getLogger().log(Level.INFO, message, throwable);
     }
 
-    public static void debug(String message, Object... args){
-        if(!DEBUG_ENABLED) return;
+    public static void debug(String message, Object... args) {
+        if (!DEBUG_ENABLED) {
+            return;
+        }
         info("[DEBUG] " + message, args);
     }
 
-    public static void debug(CommandSender sender, String message, Object... args){
-        if(!DEBUG_ENABLED) return;
+    public static void debug(CommandSender sender, String message, Object... args) {
+        if (!DEBUG_ENABLED) {
+            return;
+        }
         send(sender, "[DEBUG] " + message, args);
     }
 }

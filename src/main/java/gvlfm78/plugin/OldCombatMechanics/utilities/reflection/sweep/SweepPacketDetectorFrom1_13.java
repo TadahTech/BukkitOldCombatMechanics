@@ -12,35 +12,35 @@ class SweepPacketDetectorFrom1_13 extends AbstractSweepPacketDetector {
     private Field particleParamField;
     private Method particleParamNameMethod;
 
-    SweepPacketDetectorFrom1_13(){
-        for(Field field : PACKET_CLASS.getDeclaredFields()){
-            if(field.getType().getSimpleName().equals("ParticleParam")){
+    SweepPacketDetectorFrom1_13() {
+        for (Field field : PACKET_CLASS.getDeclaredFields()) {
+            if (field.getType().getSimpleName().equals("ParticleParam")) {
                 particleParamField = field;
                 particleParamField.setAccessible(true);
             }
         }
-        if(particleParamField == null){
+        if (particleParamField == null) {
             throwNewElementNotFoundException("Particle param field");
         }
 
         Class<?> particleParamClass = Reflector.getClass(ClassType.NMS, "ParticleParam");
-        if(particleParamClass == null){
+        if (particleParamClass == null) {
             throwNewElementNotFoundException("ParticleParam class");
         }
 
-        for(Method method : particleParamClass.getMethods()){
-            if(method.getReturnType() == String.class){
+        for (Method method : particleParamClass.getMethods()) {
+            if (method.getReturnType() == String.class) {
                 particleParamNameMethod = method;
             }
         }
-        if(particleParamNameMethod == null){
+        if (particleParamNameMethod == null) {
             throwNewElementNotFoundException("Particle param description method");
         }
     }
 
     @Override
-    public boolean isSweepPacket(Packet packet){
-        if(isWrongPacketType(packet)){
+    public boolean isSweepPacket(Packet packet) {
+        if (isWrongPacketType(packet)) {
             return false;
         }
 

@@ -13,18 +13,18 @@ public class WeaponDamages {
 
     private static OCMMain plugin;
 
-    public static void initialise(OCMMain plugin){
+    public static void initialise(OCMMain plugin) {
         WeaponDamages.plugin = plugin;
         reload();
     }
 
-    private static void reload(){
+    private static void reload() {
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("old-tool-damage.damages");
 
         damages = ConfigUtils.loadDoubleMap(section);
     }
 
-    public static double getDamage(Material mat){
+    public static double getDamage(Material mat) {
         return damages.getOrDefault(mat.name(), -1.0);
     }
 }

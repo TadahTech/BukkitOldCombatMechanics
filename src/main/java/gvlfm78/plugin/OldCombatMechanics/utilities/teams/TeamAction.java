@@ -12,20 +12,20 @@ public enum TeamAction {
 
     private int minecraftId;
 
-    TeamAction(int minecraftId){
+    TeamAction(int minecraftId) {
         this.minecraftId = minecraftId;
     }
 
-    public int getMinecraftId(){
-        return minecraftId;
-    }
-
-    public static TeamAction fromId(int id){
-        for(TeamAction rule : values()){
-            if(rule.getMinecraftId() == id){
+    public static TeamAction fromId(int id) {
+        for (TeamAction rule : values()) {
+            if (rule.getMinecraftId() == id) {
                 return rule;
             }
         }
         return null;
+    }
+
+    public int getMinecraftId() {
+        return minecraftId;
     }
 }

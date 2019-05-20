@@ -22,27 +22,27 @@ import java.util.Optional;
  */
 public class ModuleAttackCooldown extends Module {
 
-    public ModuleAttackCooldown(OCMMain plugin){
+    public ModuleAttackCooldown(OCMMain plugin) {
         super(plugin, "disable-attack-cooldown");
     }
 
     @Override
-    public void reload(){
+    public void reload() {
         Bukkit.getOnlinePlayers().forEach(this::adjustAttackSpeed);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerLogin(PlayerJoinEvent e){
+    public void onPlayerLogin(PlayerJoinEvent e) {
         adjustAttackSpeed(e.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onWorldChange(PlayerChangedWorldEvent e){
+    public void onWorldChange(PlayerChangedWorldEvent e) {
         adjustAttackSpeed(e.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerQuit(PlayerQuitEvent e){
+    public void onPlayerQuit(PlayerQuitEvent e) {
         Player player = e.getPlayer();
 
         // TODO: Why is it reset here? To make uninstalling the plugin easier?
@@ -54,12 +54,12 @@ public class ModuleAttackCooldown extends Module {
      *
      * @param player the player to set it for
      */
-    private void adjustAttackSpeed(Player player){
+    private void adjustAttackSpeed(Player player) {
         World world = player.getWorld();
 
         double attackSpeed = Config.moduleEnabled("disable-attack-cooldown", world)
-                ? module().getDouble("generic-attack-speed")
-                : PVPMode.NEW_PVP.getBaseAttackSpeed();
+          ? module().getDouble("generic-attack-speed")
+          : PVPMode.NEW_PVP.getBaseAttackSpeed();
 
         setAttackSpeed(player, attackSpeed);
     }
@@ -70,11 +70,11 @@ public class ModuleAttackCooldown extends Module {
      * @param player      the player to set it for
      * @param attackSpeed the attack speed to set it to
      */
-    private void setAttackSpeed(Player player, double attackSpeed){
+    private void setAttackSpeed(Player player, double attackSpeed) {
         AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
         double baseValue = attribute.getBaseValue();
 
-        if(baseValue != attackSpeed){
+        if (baseValue != attackSpeed) {
             attribute.setBaseValue(attackSpeed);
             player.saveData();
         }
@@ -91,9 +91,30 @@ public class ModuleAttackCooldown extends Module {
         private String name;
         private double baseAttackSpeed;
 
-        PVPMode(String name, double baseAttackSpeed){
+        PVPMode(String name, double baseAttackSpeed) {
             this.name = name;
             this.baseAttackSpeed = baseAttackSpeed;
+        }
+
+        /**
+         * Returns the PVP mode for the player, defaulting to {@link #OLD_PVP}.
+         *
+         * @param player the player to get it for
+         * @return the PVP mode of the player
+         */
+        public static PVPMode getModeForPlayer(Player player) {
+            Objects.requireNonNull(player, "player cannot be null!");
+
+            double baseAttackSpeed = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getBaseValue();
+
+            return getByBaseAttackSpeed(baseAttackSpeed)
+              .orElse(PVPMode.OLD_PVP);
+        }
+
+        private static Optional<PVPMode> getByBaseAttackSpeed(double speed) {
+            return Arrays.stream(values())
+              .filter(pvpMode -> pvpMode.getBaseAttackSpeed() == speed)
+              .findFirst();
         }
 
         /**
@@ -101,7 +122,7 @@ public class ModuleAttackCooldown extends Module {
          *
          * @return the human readable name
          */
-        public String getName(){
+        public String getName() {
             return name;
         }
 
@@ -112,29 +133,8 @@ public class ModuleAttackCooldown extends Module {
          *
          * @return the base value
          */
-        public double getBaseAttackSpeed(){
+        public double getBaseAttackSpeed() {
             return baseAttackSpeed;
-        }
-
-        /**
-         * Returns the PVP mode for the player, defaulting to {@link #OLD_PVP}.
-         *
-         * @param player the player to get it for
-         * @return the PVP mode of the player
-         */
-        public static PVPMode getModeForPlayer(Player player){
-            Objects.requireNonNull(player, "player cannot be null!");
-
-            double baseAttackSpeed = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getBaseValue();
-
-            return getByBaseAttackSpeed(baseAttackSpeed)
-                    .orElse(PVPMode.OLD_PVP);
-        }
-
-        private static Optional<PVPMode> getByBaseAttackSpeed(double speed){
-            return Arrays.stream(values())
-                    .filter(pvpMode -> pvpMode.getBaseAttackSpeed() == speed)
-                    .findFirst();
         }
     }
 }

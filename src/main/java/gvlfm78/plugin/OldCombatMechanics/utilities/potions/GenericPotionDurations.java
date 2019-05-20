@@ -9,7 +9,7 @@ public class GenericPotionDurations {
 
     private final int base, II, extended;
 
-    public GenericPotionDurations(int base, int II, int extended){
+    public GenericPotionDurations(int base, int II, int extended) {
         this.base = base;
         this.II = II;
         this.extended = extended;
@@ -20,7 +20,7 @@ public class GenericPotionDurations {
      *
      * @return the base potion duration in seconds.
      */
-    public int getBaseTime(){
+    public int getBaseTime() {
         return base;
     }
 
@@ -29,7 +29,7 @@ public class GenericPotionDurations {
      *
      * @return the duration in seconds for the amplified potion.
      */
-    public int getIITime(){
+    public int getIITime() {
         return II;
     }
 
@@ -38,7 +38,7 @@ public class GenericPotionDurations {
      *
      * @return the duration in seconds for the extended potion
      */
-    public int getExtendedTime(){
+    public int getExtendedTime() {
         return extended;
     }
 }

@@ -9,21 +9,21 @@ class SweepPacketDetectorUpTo1_12 extends AbstractSweepPacketDetector {
 
     private Field enumParticleField;
 
-    SweepPacketDetectorUpTo1_12(){
-        for(Field field : PACKET_CLASS.getDeclaredFields()){
-            if(field.getType().getSimpleName().equals("EnumParticle")){
+    SweepPacketDetectorUpTo1_12() {
+        for (Field field : PACKET_CLASS.getDeclaredFields()) {
+            if (field.getType().getSimpleName().equals("EnumParticle")) {
                 this.enumParticleField = field;
                 this.enumParticleField.setAccessible(true);
             }
         }
-        if(enumParticleField == null){
+        if (enumParticleField == null) {
             throwNewElementNotFoundException("EnumParticle field");
         }
     }
 
     @Override
-    public boolean isSweepPacket(Packet packet){
-        if(isWrongPacketType(packet)){
+    public boolean isSweepPacket(Packet packet) {
+        if (isWrongPacketType(packet)) {
             return false;
         }
 
